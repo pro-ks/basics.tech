@@ -195,18 +195,6 @@ class RealEstateForm {
      */
 	public function process_image($real_estate_id) {
 	    if (!empty($_FILES['image']['name'])) {
-	        // Проверяем размер файла
-	        $max_file_size = 10 * 1024 * 1024; // 10 MB
-	        if ($_FILES['image']['size'] > $max_file_size) {
-	            wp_send_json_error(__('File size exceeds the maximum allowed limit.', 'understrap-child'));
-	        }
-
-	        // Проверяем тип файла
-	        $file_info = wp_check_filetype($_FILES['image']['name']);
-	        $allowed_mime_types = array('image/jpeg', 'image/png', 'image/gif');
-	        if (!$file_info || !in_array($file_info['type'], $allowed_mime_types)) {
-	            wp_send_json_error(__('Only JPEG, PNG, and GIF images are allowed.', 'understrap-child'));
-	        }
 
 	        $uploaded_image = wp_handle_upload($_FILES['image'], array('test_form' => false));
 
@@ -244,6 +232,28 @@ class RealEstateForm {
 	}
 
     /**
+     * Метод для проверки изображения.
+     *
+     * @return string|null Сообщение об ошибке, если изображение недопустимо. Null, если изображение допустимо.
+     */
+    public function validate_image() {
+        // Проверяем размер файла
+        $max_file_size = 10 * 1024 * 1024; // 10 MB
+        if ($_FILES['image']['size'] > $max_file_size) {
+            return __('File size exceeds the maximum allowed limit.', 'understrap-child');
+        }
+
+        // Проверяем тип файла
+        $file_info = wp_check_filetype($_FILES['image']['name']);
+        $allowed_mime_types = array('image/jpeg', 'image/png', 'image/gif');
+        if (!$file_info || !in_array($file_info['type'], $allowed_mime_types)) {
+            return __('Only JPEG, PNG, and GIF images are allowed.', 'understrap-child');
+        }
+
+        return null; // Если изображение допустимо
+    }
+
+    /**
      * Метод для добавления недвижимости.
      * Проверяет обязательные поля, создает новую запись о недвижимости и сохраняет данные в базе.
      */
@@ -273,7 +283,13 @@ class RealEstateForm {
 	        }
 		    
 	    }
+        // Проверка изображения
+        $image_error = $this->validate_image();
+        if ($image_error) {
+            wp_send_json_error($image_error);
+        }
 
+        // Проверка наличия и валидности изображения
         if (!isset($_FILES['image']) || empty($_FILES['image'])) {
             wp_send_json_error(__('The image field is required.', 'understrap-child'));
         }
