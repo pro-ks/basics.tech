@@ -35,11 +35,9 @@ jQuery(document).ready(function($) {
     	$('#add-real-estate-form').addClass('disabled');
 
 	    var formData = new FormData($(this)[0]);
-	    console.log(formData);
+
 	    // Добавляем параметр "action"
-	    formData.append('action', 'add_real_estate');
-	    console.log(formData);
-	    
+	    formData.append('action', 'add_real_estate');    
 
 	    $.ajax({
 	        type: 'POST',
